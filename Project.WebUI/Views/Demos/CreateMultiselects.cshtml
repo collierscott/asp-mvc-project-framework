@@ -1,0 +1,599 @@
+﻿@using Project.WebUI.Utilities
+@model Project.WebUI.Models.Demos.PageModels.MultiselectPageModel
+@{
+    ViewBag.Title = "Multiselects";
+    var page = Model;
+    var facility = ViewBag.Facility;
+}
+@section HeaderCss {
+    <link href="~/Content/multiple-select.css" rel="stylesheet"/>
+    <style>
+        .ms-drop > input[type="radio"], input[type="checkbox"] {
+            margin: -1px 2px 0;
+        }
+
+        .ms-drop ul > li {
+            float: left;
+            clear: both;
+        }
+    </style>
+}
+
+@section HeaderScripts {
+    <script src="~/Scripts/multiple-select.js"></script>
+}
+@{ Html.RenderAction("Menu", "Nav", new { selected = "Demos", parameters = new { facility } }); }
+<div class="row">
+    <div class="col-xs-12 col-md-4 col-md-offset-8">
+        @{
+            Html.RenderAction("LastUpdated", "Home");
+        }
+    </div>
+</div>
+<div class="row">
+    <div class="xs-col-12 text-center" style="margin-bottom: 10px;">
+        @Html.DropDownList("wafers-dropdown", page.WaferSizeItems, new { multiple = "multiple", size = "1", title = "Choose one or more wafers" })
+        @Html.DropDownList("route-groups-dropdown", page.RouteGroupItems, new { multiple = "multiple", size = "1", title = "Choose one or more route groups" })
+        @Html.DropDownList("route-families-dropdown", page.RouteFamilyItems, new { multiple = "multiple", size = "1", title = "Choose one or more route families" })
+        @Html.DropDownList("series-dropdown", page.SerieItems, new { multiple = "multiple", size = "1", title = "Choose one or more series" })
+    </div>
+</div>
+
+@section BottomScripts {
+    <script>
+        var facility = '@page.FacilityId';
+        var dd_facility = $('#facility-dropdown');
+        var dd_wafersizes = $('#wafers-dropdown');
+        var dd_routegroups = $('#route-groups-dropdown');
+        var dd_routefamilies = $('#route-families-dropdown');
+        var dd_series = $('#series-dropdown');
+        var changed = false;
+        var isUpdating = false;
+
+        (function($) {
+
+            var init = function () {
+
+                var seriesObject = {
+                    dropdown: dd_series,
+                    children: [],
+                    isChanged: false,
+                    shouldRefresh: false,
+                    selected: [@Html.Raw(Utility.AddSingleQuotes(page.Series))],
+                    count: @page.SerieItems.Count,
+                    isUpdating: false
+
+                };
+
+                var routeFamiliesObject = {
+                    dropdown: dd_routefamilies,
+                    children: [seriesObject],
+                    isChanged: false,
+                    shouldRefresh: false,
+                    selected: [@Html.Raw(Utility.AddSingleQuotes(page.RouteFamilies))],
+                    count: @page.RouteFamilyItems.Count,
+                    isUpdating: false
+                };
+
+                var routeGroupsObject = {
+                    dropdown: dd_routegroups,
+                    children: [routeFamiliesObject, seriesObject],
+                    isChanged: false,
+                    shouldRefresh: false,
+                    selected: [@Html.Raw(Utility.AddSingleQuotes(page.RouteGroups))],
+                    count: @page.RouteGroupItems.Count,
+                    isUpdating: false
+                };
+
+
+                var waferSizesObject = {
+                    dropdown: dd_wafersizes,
+                    children: [routeGroupsObject, routeFamiliesObject, seriesObject],
+                    isChanged: false,
+                    shouldRefresh: false,
+                    selected: [@Html.Raw(Utility.AddSingleQuotes(page.WaferSizes))],
+                    count: @page.WaferSizeItems.Count,
+                    isUpdating: false
+                };
+
+                var facilityObject = {
+                    dropdown: dd_facility,
+                    children: [waferSizesObject, routeGroupsObject, routeFamiliesObject, seriesObject],
+                    isChanged: false,
+                    shouldRefresh: false,
+                    selected: facility,
+                    isUpdating: false
+                };
+
+                function emptySelected(obj) {
+                    obj.selected.length = 0;
+                }
+
+                function emptyDropdown(obj) {
+                    var dd = obj.dropdown;
+                    dd.find('option').remove().end();
+                    dd[0].options.length = 0;
+
+                }
+
+                function isNullOrEmptyOrAll(str) {
+                    if (!str || str.length === 0 || str === 'ALL') return true;
+                    return false;
+                }
+
+                function getSelectedItems(obj) {
+                    return obj.dropdown.multipleSelect('getSelects');
+                }
+
+                function refreshChildren(obj) {
+                    $.each(obj.children, function(i, item) {
+                        item.dropdown.multipleSelect("refresh");
+                    });
+                }
+
+                function emptyChildren(obj) {
+                    $.each(obj.children, function(i, item) {
+                        emptyDropdown(item);
+                        emptySelected(item);
+                        item.dropdown.multipleSelect("refresh");
+                        item.isChanged = true;
+                        item.shouldRefresh = true;
+                        changed = true;
+                    });
+                }
+
+                function emptySelf(obj) {
+                    emptyDropdown(obj);
+                    emptySelected(obj);
+                    obj.dropdown.multipleSelect("refresh");
+                    obj.isChanged = true;
+                    obj.shouldRefresh = true;
+                    changed = true;
+                }
+
+                function emptyAll() {
+                    emptyChildren(facilityObject);
+                };
+
+                function updateWaferSizes() {
+
+                    isUpdating = true;
+
+                    waferSizesObject.selected = getSelectedItems(waferSizesObject);
+
+                    var params = { 'facility': facility, 'waferSize': waferSizesObject.selected.toString() };
+
+                    $('#multiselect-wafers-dropdown').addClass('dropdown-loading');
+
+                    var len = waferSizesObject.selected.length;
+                    var current = waferSizesObject.selected.toString();
+                    emptyAll();
+
+                    $.ajax({
+                        method: 'POST',
+                        url: '@Url.Action("GetWaferSizes", "Demos")',
+                        data: JSON.stringify(params),
+                        contentType: 'application/json; charset=utf-8',
+                        dataType: 'json'
+                    }).done(function(response) {
+
+                        var count = response.count;
+
+                        $.each(response.selects, function(i, item) {
+
+                            var selected = '';
+
+                            if (len > 0 && len !== count && current !== 'ALL') {
+
+                                if (item.Selected === true) {
+                                    selected = 'selected="selected"';
+                                }
+
+                            }
+
+                            waferSizesObject.dropdown.append('<option value="' + item.Value + '" ' + selected + '>' + item.Text + '</option>');
+
+                        });
+
+                        waferSizesObject.dropdown.multipleSelect("refresh");
+
+                        isUpdating = false;
+                        waferSizesObject.isChanged = false;
+                        waferSizesObject.shouldRefresh = false;
+
+                    }).fail(function() {
+                        waferSizesObject.shouldRefresh = true;
+                    }).always(function() {
+
+                        if (!isUpdating) {
+                            $('#multiselect-wafers-dropdown').removeClass('dropdown-loading');
+                        }
+
+                        waferSizesObject.dropdown.removeAttr('disabled');
+
+                    });
+
+                }
+
+                function updateRouteGroups() {
+
+                    //alert('Is updating RouteGroups');
+
+                    isUpdating = true;
+
+                    waferSizesObject.selected = getSelectedItems(waferSizesObject);
+                    routeGroupsObject.selected = getSelectedItems(routeGroupsObject);
+
+                    //alert(routeGroupsObject.selected);
+                    //, 'routeGroup': routeGroupsObject.selected.toString()
+
+                    var params = { 'facility': facility, 'waferSize': waferSizesObject.selected.toString(), 'routeGroup': 'NONE' };
+
+                    $('#multiselect-route-groups-dropdown').addClass('dropdown-loading');
+
+                    var len = routeGroupsObject.selected.length;
+                    var current = routeGroupsObject.selected.toString();
+
+                    emptySelf(routeGroupsObject);
+                    emptyChildren(routeGroupsObject);
+
+                    $.ajax({
+                        method: 'POST',
+                        url: '@Url.Action("GetRouteGroups", "Demos")',
+                        data: JSON.stringify(params),
+                        contentType: 'application/json; charset=utf-8',
+                        dataType: 'json'
+                    }).done(function(response) {
+
+                        var count = response.count;
+
+                        $.each(response.selects, function(i, item) {
+
+                            var selected = '';
+
+                            if (len > 0 && len !== count && current !== 'ALL') {
+
+                                if (item.Selected === true) {
+                                    selected = 'selected="selected"';
+                                }
+
+                            }
+
+                            routeGroupsObject.dropdown.append('<option value="' + item.Value + '" ' + selected + '>' + item.Text + '</option>');
+
+                        });
+
+                        routeGroupsObject.dropdown.multipleSelect("refresh");
+
+                        isUpdating = false;
+                        routeGroupsObject.isChanged = false;
+                        routeGroupsObject.shouldRefresh = false;
+
+                    }).fail(function() {
+                        routeGroupsObject.shouldRefresh = true;
+                    }).always(function() {
+
+                        if (!isUpdating) {
+
+                            $('#multiselect-route-groups-dropdown').removeClass('dropdown-loading');
+                        }
+
+                        routeGroupsObject.dropdown.removeAttr('disabled');
+
+                    });
+
+
+                }
+
+                function updateRouteFamilies() {
+
+                    isUpdating = true;
+                    waferSizesObject.selected = getSelectedItems(waferSizesObject);
+                    routeGroupsObject.selected = getSelectedItems(routeGroupsObject);
+                    routeFamiliesObject.selected = getSelectedItems(routeFamiliesObject);
+
+                    var params = { 'facility': facility, 'waferSize': waferSizesObject.selected.toString(), 'routeGroup': routeGroupsObject.selected.toString(), 'routeFamily': 'NONE' };
+
+                    $('#multiselect-route-families-dropdown').addClass('dropdown-loading');
+
+                    var len = routeFamiliesObject.selected.length;
+                    var current = routeFamiliesObject.selected.toString();
+                
+                    emptySelf(routeFamiliesObject);
+                    emptyChildren(routeFamiliesObject);
+
+                    $.ajax({
+                        method: 'POST',
+                        url: '@Url.Action("GetRouteFamilies", "Demos")',
+                        data: JSON.stringify(params),
+                        contentType: 'application/json; charset=utf-8',
+                        dataType: 'json'
+                    }).done(function(response) {
+
+                        var count = response.count;
+
+                        $.each(response.selects, function(i, item) {
+                            var selected = '';
+
+                            if (len > 0 && len !== count && current !== 'ALL') {
+
+                                if (item.Selected === true) {
+                                    selected = 'selected="selected"';
+                                }
+
+                            }
+
+                            routeFamiliesObject.dropdown.append('<option value="' + item.Value + '" ' + selected + '>' + item.Text + '</option>');
+                        });
+
+                        routeFamiliesObject.dropdown.multipleSelect("refresh");
+
+                        isUpdating = false;
+                        routeFamiliesObject.isChanged = false;
+                        routeFamiliesObject.shouldRefresh = false;
+
+                    }).fail(function() {
+                        routeFamiliesObject.shouldRefresh = true;
+                    }).always(function() {
+
+                        if (!isUpdating) {
+
+                            $('#multiselect-route-families-dropdown').removeClass('dropdown-loading');
+                        }
+
+                        routeFamiliesObject.dropdown.removeAttr('disabled');
+
+                    });
+
+                }
+
+                function updateSeries() {
+
+                    //alert('Is updating Series');
+
+                    $('#multiselect-series-dropdown').addClass('dropdown-loading');
+
+                    waferSizesObject.selected = getSelectedItems(waferSizesObject);
+                    routeGroupsObject.selected = getSelectedItems(routeGroupsObject);
+                    routeFamiliesObject.selected = getSelectedItems(routeFamiliesObject);
+                    seriesObject.selected = getSelectedItems(seriesObject);
+
+                    var params = {
+                        'facility': facility,
+                        'waferSize': waferSizesObject.selected.toString(),
+                        'routeGroup': routeGroupsObject.selected.toString(),
+                        'routeFamily': routeFamiliesObject.selected.toString(),
+                        'series': 'NONE'
+                    };
+
+                    var len = seriesObject.selected.length;
+                    var current = seriesObject.selected.toString();
+                    emptySelf(seriesObject);
+                    emptyChildren(seriesObject);
+
+                    $.ajax({
+                        method: 'POST',
+                        url: '@Url.Action("GetSeries", "Demos")',
+                        data: JSON.stringify(params),
+                        contentType: 'application/json; charset=utf-8',
+                        dataType: 'json'
+                    }).done(function(response) {
+
+                        var count = response.count;
+
+                        $.each(response.selects, function(i, item) {
+                            var selected = '';
+
+                            if (len > 0 && len !== count && current !== 'ALL') {
+
+                                if (item.Selected === true) {
+                                    selected = 'selected="selected"';
+                                }
+
+                            }
+
+                            seriesObject.dropdown.append('<option value="' + item.Value + '" ' + selected + '>' + item.Text + '</option>');
+                        });
+
+                        seriesObject.dropdown.multipleSelect("refresh");
+
+                        isUpdating = false;
+                        seriesObject.isChanged = false;
+                        seriesObject.shouldRefresh = false;
+
+                    }).fail(function() {
+                        seriesObject.shouldRefresh = true;
+                    }).always(function() {
+
+                        if (!isUpdating) {
+
+                            $('#multiselect-series-dropdown').removeClass('dropdown-loading');
+                        }
+
+                        seriesObject.dropdown.removeAttr('disabled');
+
+                    });
+
+                }
+
+                waferSizesObject.dropdown.multipleSelect({
+
+                    id: 'multiselect-wafers-dropdown',
+                    width: 140,
+                    boxWidth: 140,
+                    placeholder: 'Wafer Sizes',
+                    onClose: function() {
+                        if (changed || waferSizesObject.isChanged) {
+                            waferSizesObject.selected = getSelectedItems(waferSizesObject);
+                            emptyChildren(waferSizesObject);
+                            changed = false; //reset flag
+                        }
+                    },
+                    onClick: function(view) {
+                        emptyChildren(waferSizesObject);
+                        changed = true;
+                        waferSizesObject.isChanged = true;
+                    },
+                    onOpen: function() {                  
+                        if (waferSizesObject.shouldRefresh) {
+                            updateWaferSizes();
+                        }
+                    },
+                    onCheckAll: function() {
+                        emptyChildren(waferSizesObject);
+                        changed = true;
+                        waferSizesObject.isChanged = true;
+                    },
+                    onUncheckAll: function() {
+                        emptyChildren(waferSizesObject);
+                        changed = true;
+                        waferSizesObject.isChanged = true;
+                    }
+
+                });
+
+                routeGroupsObject.dropdown.multipleSelect({
+                    id: 'multiselect-route-groups-dropdown',
+                    width: 180,
+                    boxWidth: 180,
+                    placeholder: 'Route Groups',
+                    onClose: function() {
+                        //alert('rg on close');
+                        if (routeGroupsObject.isChanged) {                      
+                            routeGroupsObject.selected = getSelectedItems(routeGroupsObject);
+                            emptyChildren(routeGroupsObject);
+                            changed = false; //reset flag
+                        }
+                    },
+                    onClick: function(view) {
+                        //alert('rg on click');
+                        emptyChildren(routeGroupsObject);
+                        changed = true;
+                        routeGroupsObject.isChanged = true;
+                        //alert(view.value + ' ' + view.checked);
+                    },
+                    onOpen: function() {
+                        
+                        waferSizesObject.dropdown.multipleSelect('force');
+                        //alert(routeGroupsObject.shouldRefresh);
+                        if (routeGroupsObject.shouldRefresh) {
+                            updateRouteGroups();
+                        }
+                    },
+                    onCheckAll: function() {
+                        //alert('rg on check all');
+                        emptyChildren(routeGroupsObject);
+                        changed = true;
+                        routeGroupsObject.isChanged = true;
+
+                    },
+                    onUncheckAll: function() {
+                        //alert('rg on uncheck');
+                        emptyChildren(routeGroupsObject);
+                        changed = true;
+                        routeGroupsObject.isChanged = true;
+
+                    }
+                });
+
+                routeFamiliesObject.dropdown.multipleSelect({
+                    id: 'multiselect-route-families-dropdown',
+                    width: 180,
+                    boxWidth: 180,
+                    placeholder: 'Route Families',
+                    onClose: function() {
+                        //alert('rf on close');
+                        if (routeFamiliesObject.isChanged) {
+                            routeFamiliesObject.selected = getSelectedItems(routeFamiliesObject);
+                            emptyChildren(routeFamiliesObject);
+                            changed = false; //reset flag
+                        }
+                    },
+                    onClick: function(view) {
+                        //alert('rf on click');
+                        emptyChildren(routeFamiliesObject);
+                        changed = true;
+                        routeFamiliesObject.isChanged = true;
+                    },
+                    onOpen: function() {
+                        //alert('rf on open');
+                        //changed || 
+                        waferSizesObject.dropdown.multipleSelect('force');
+                        routeGroupsObject.dropdown.multipleSelect('force');
+
+                        if (routeFamiliesObject.shouldRefresh) {
+                            updateRouteFamilies();
+                        }
+                    },
+                    onCheckAll: function() {
+                        //alert('rf on check');
+                        emptyChildren(routeFamiliesObject);
+                        changed = true;
+                        routeFamiliesObject.isChanged = true;
+                    },
+                    onUncheckAll: function() {
+                        //alert('rf on uncheck');
+                        emptyChildren(routeFamiliesObject);
+                        changed = true;
+                        routeFamiliesObject.isChanged = true;
+                    }
+                });
+
+                seriesObject.dropdown.multipleSelect({
+                    id: 'multiselect-series-dropdown',
+                    width: 180,
+                    boxWidth: 180,
+                    placeholder: 'Series',
+                    onClose: function() {
+                        //alert('ser on close');
+                        if (changed || seriesObject.isChanged) {
+                            changed = false; //reset flag
+                            seriesObject.selected = getSelectedItems(seriesObject);
+                            emptyChildren(seriesObject);
+                        }
+                    },
+                    onClick: function(view) {
+                        //alert('ser on click');
+                        emptyChildren(seriesObject);
+                        changed = true;
+                        seriesObject.isChanged = true;
+                    },
+                    onOpen: function() {
+                        //alert('ser on open');
+                        waferSizesObject.dropdown.multipleSelect('force');
+                        routeGroupsObject.dropdown.multipleSelect('force');
+                        routeFamiliesObject.dropdown.multipleSelect('force');
+
+                        if (seriesObject.shouldRefresh) {
+                            updateSeries();
+                        }
+                    },
+                    onCheckAll: function() {
+                        //alert('ser on check');
+                        emptyChildren(seriesObject);
+                        changed = true;
+                        seriesObject.isChanged = true;
+                    },
+                    onUncheckAll: function() {
+                        //alert('ser on uncheck');
+                        emptyChildren(seriesObject);
+                        changed = true;
+                        seriesObject.isChanged = true;
+                    }
+
+                });
+
+                facilityObject.dropdown.on('change', function() {
+                    facility = $(this).val();
+                    emptyAll();
+
+                });
+
+            }
+
+            $(init());
+
+        })(jQuery);
+
+    </script>
+}

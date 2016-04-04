@@ -1,0 +1,21 @@
+﻿/*
+    CSS common between applitions
+*/
+.query-message {
+  display: none;
+}
+.data-cell,
+.data-cell-right,
+.data-cell-left {
+  vertical-align: top;
+}
+.data-cell {
+  text-align: center;
+}
+.data-cell-right {
+  text-align: right;
+}
+.data-cell-left {
+  text-align: left;
+}
+/*# sourceMappingURL=common.css.map */

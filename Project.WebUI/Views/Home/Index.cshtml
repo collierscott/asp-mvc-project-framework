@@ -1,0 +1,40 @@
+﻿@{
+    ViewBag.Title = "Template Home";
+    var facility = ViewBag.Facility;
+}
+@{
+    Html.RenderAction("Menu", "Nav", new { selected = ViewBag.Page, parameters = new { facility } });
+}
+<div class="row">
+    <div class="col-md-8">
+    </div>
+    <div class="col-md-2">
+    </div>
+    <div class="col-md-3 pull-right">
+        @{ Html.RenderAction("LastUpdated", "Home"); }
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        <h1>This is a Heading1</h1>
+        <p>Just some text</p>
+        <h2>This is a Heading2</h2>
+        <p>Just some text</p>
+        <h3>This is a Heading3</h3>
+        <p>Just some text</p>
+        <h4>This is a Heading4</h4>
+        <p>Just some text</p>
+        <h5>This is a Heading5</h5>
+        <p>Just some text</p>
+
+        <h1>Information</h1>
+        <h2>FAQs</h2>
+        <p>
+            Some helpful links to do research and find out more info:
+            <ul>
+                <li><a href="http://huyrua.wordpress.com/2010/08/25/specification-pattern-in-entity-framework-4-revisited/">Generic Repository</a></li>
+                <li><a href="http://www.google.com">Google</a></li>
+            </ul>
+        </p>
+    </div>
+</div>

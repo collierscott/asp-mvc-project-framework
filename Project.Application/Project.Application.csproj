@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6CDBA552-1448-40E5-965D-EAE8E57F9658}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Project.Application</RootNamespace>
+    <AssemblyName>Project.Application</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Infrastructure.Data, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Infrastructure\bin\Release\Infrastructure.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Oracle.ManagedDataAccess, Version=4.121.1.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\odp.net.managed.121.1.2\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Contexts\MenuContext.cs" />
+    <Compile Include="Maps\Demos\FacilityMap.cs" />
+    <Compile Include="Maps\Demos\GoalReasonMap.cs" />
+    <Compile Include="Models\Charting\ChartHoverMessage.cs" />
+    <Compile Include="Models\Charting\ChartItem.cs" />
+    <Compile Include="Models\Demos\DemoChartHoverMessage.cs" />
+    <Compile Include="Models\Demos\Filter.cs" />
+    <Compile Include="Models\Demos\GetColorsQuery.cs" />
+    <Compile Include="Models\Demos\SeriesItem.cs" />
+    <Compile Include="Models\DropdownItem.cs" />
+    <Compile Include="Models\Menus\BreadcrumbItem.cs" />
+    <Compile Include="Models\Menus\MenuItem.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Queries\BuildModulesQuery.cs" />
+    <Compile Include="Queries\Demos\GetDemosChartItemsQuery.cs" />
+    <Compile Include="Queries\Demos\GetFacilitiesQuery.cs" />
+    <Compile Include="Queries\Demos\GetRouteFamiliesQuery.cs" />
+    <Compile Include="Queries\Demos\GetRouteGroupsQuery.cs" />
+    <Compile Include="Queries\Demos\GetSeriesQuery.cs" />
+    <Compile Include="Queries\Demos\GetStackBarSeriesQuery.cs" />
+    <Compile Include="Queries\Demos\GetStackedBarItemsQuery.cs" />
+    <Compile Include="Queries\Demos\GetWaferSizesQuery.cs" />
+    <Compile Include="Queries\FindFacilityQuery.cs" />
+    <Compile Include="Queries\FindModuleQuery.cs" />
+    <Compile Include="Repositories\Abstract\IProjectRepository.cs" />
+    <Compile Include="Contexts\ProjectContext.cs" />
+    <Compile Include="Repositories\Abstract\IMenuRepository.cs" />
+    <Compile Include="Repositories\ProjectRepository.cs" />
+    <Compile Include="Repositories\MenuRepository.cs" />
+    <Compile Include="Services\Abstract\IProjectService.cs" />
+    <Compile Include="Services\Abstract\IMenuService.cs" />
+    <Compile Include="Services\ProjectService.cs" />
+    <Compile Include="Services\MenuService.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Project.Domain\Project.Domain.csproj">
+      <Project>{5ad70aee-a2b3-466b-a41a-5453df364e08}</Project>
+      <Name>Project.Domain</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

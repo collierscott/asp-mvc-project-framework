@@ -1,0 +1,38 @@
+﻿@model Project.WebUI.Models.Demos.PageModels.ChartPageModel
+@{
+    ViewBag.Title = "Create a Highcharts Chart";
+    var page = Model;
+    var facility = ViewBag.Facility;
+}
+@section HeaderScripts {
+    <script src="~/Scripts/Highcharts-4.0.1/js/highcharts-all.js"></script>
+}
+@{ Html.RenderAction("Menu", "Nav", new { selected = "Demos", parameters = new { facility } }); }
+<div class="row">
+    <div class="col-md-4 col-md-offset-8">
+        @{
+            Html.RenderAction("LastUpdated", "Home");
+        }
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <h1 style="margin-top: 10px;">Highcharts</h1>
+        <p><strong>Current Version:  </strong> 4.0.1</p>
+        <p><strong>Downloads: </strong>Highcharts (<a href="http://www.highcharts.com/products/highcharts" target="_blank">http://www.highcharts.com/products/highcharts</a>) or Nuget package and DotNet Highcharts (Add via Nuget in Visual Studio)</p>
+        <p><strong>Documentation:  </strong><a href="http://api.highcharts.com/highcharts" target="_blank">http://api.highcharts.com/highcharts</a></p>
+        <p><strong>Demos:  </strong><a href="http://www.highcharts.com/demo/" target="_blank">http://www.highcharts.com/demo/</a></p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div id="chart-wrapper" style="width: 100%; text-align: center;">
+            <div id="chart-content" style="display: inline-block;">
+                @if (page != null)
+                {
+                    @(page.Chart)
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,16 @@
+﻿@using Infrastructure.Data.Notify
+@model IList<Notification>
+@if (Model != null && Model.Any())
+{
+
+    foreach (var item in Model)
+    {
+        <div class="query-message">
+            SQL Queries [
+                ID:  @Html.Raw(item.Id + "<br/>\n")
+                QUERY:  @Html.Raw(item.UserMessage + "<br/>\n")
+            ]
+        </div>
+    } 
+
+}

@@ -1,0 +1,145 @@
+﻿@using Project.WebUI.Utilities
+@{
+
+    var snapshotUrl = "/";
+    var queryParams = "";
+    var facilityId = "";
+
+    try
+    {
+        if (Request.Url != null)
+        {
+            var url = Request.Url.OriginalString;
+            snapshotUrl = url.Substring(0, url.IndexOf("?", StringComparison.Ordinal));
+            queryParams = url.Substring(url.IndexOf("?", StringComparison.Ordinal) + 1);
+        }
+
+        facilityId = ViewBag.Facility != null ? ViewBag.Facility.Id : Settings.DefaultFacility;
+    }
+    catch (Exception ex)
+    {
+
+    }
+}
+<div id="feedback-container">
+    <p id="snapshot-link" style="display: none;"></p>
+    <form id="feedback-form" action="#" method="post" target="_blank" style="display: none;">
+        <p class="validateTips"></p>
+
+        <table>
+
+            <tr style="vertical-align:top;">
+                <td>
+                    <label for="feedbackFrom">Sender's Email</label>
+                </td>
+                <td>
+                    <input type="text" name="feedbackFrom" id="feedbackFrom" class="text ui-widget-content ui-corner-all" style="width: 400px;" />
+                </td>
+            </tr>
+            <tr style="vertical-align:top;">
+                <td></td>
+                <td>
+                    <input id="feedbackMeOnly" type="checkbox" />
+                    <label for="feedbackMeOnly">Send to me only</label>
+                </td>
+            </tr>
+            <tr style="vertical-align:top;">
+                <td>
+                    <label for="feedbackSubject">Subject</label>
+                </td>
+                <td>
+                    <input type="text" name="feedbackSubject" id="feedbackSubject" value="" class="text ui-widget-content ui-corner-all" style="width: 400px;" />
+                </td>
+            </tr>
+            <tr style="vertical-align:top;">
+                <td>
+                    <label for="feedbackDescription">Description</label>
+                </td>
+                <td>
+                    <textarea id="feedbackDescription" name="feedbackDescription" aria-valuetext="" rows="5" class="text ui-widget-content ui-corner-all" style="width: 400px"></textarea>
+                </td>
+            </tr>
+
+        </table>
+
+        <input type="hidden" name="feedbackPageUrl" id="feedbackPageUrl" value="@snapshotUrl" />
+        <input type="hidden" name="feedbackFacility" id="feedbackFacility" value="@facilityId" />
+        <input type="hidden" name="feedbackQueryParameters" id="feedbackQueryParameters" value="@queryParams" />
+        <input type="hidden" name="feedbackContent" id="feedbackContent" value="" />
+        <input type="hidden" name="feedbackLink" id="feedbackLink" />
+        <input type="hidden" name="feedbackApplication" id="feedbackApplication" value="@Settings.Application" />
+        <input type="hidden" name="feedbackRecipients" id="feedbackRecipients" value="@Settings.FeedbackRecipients" />
+    </form>
+    <form id="email-form" action="#" method="post" target="_blank" style="display: none;">
+        <p class="validateTips"></p>
+
+        <table>
+            <tr style="vertical-align:top;">
+                <td>
+                    <label for="emailFrom">Sender's Email</label>
+                </td>
+                <td>
+                    <input type="text" name="emailFrom" id="emailFrom" class="text ui-widget-content ui-corner-all" style="width: 400px;" />
+                </td>
+            </tr>
+            <tr style="vertical-align:top;">
+                <td>
+                    <label for="emailRecipients">Recipients </label>
+                </td>
+                <td>
+                    <input type="text" name="emailRecipients" id="emailRecipients" class="text ui-widget-content ui-corner-all" style="width: 400px;" />
+                    <br />
+                    (Enter emails separated by commas)
+                </td>
+            </tr>
+            <tr style="vertical-align:top;">
+                <td>
+                    <label for="emailSubject">Subject</label>
+                </td>
+                <td>
+                    <input type="text" name="emailSubject" id="emailSubject" value="" class="text ui-widget-content ui-corner-all" style="width: 400px;" />
+                </td>
+            </tr>
+            <tr style="vertical-align:top;">
+                <td>
+                    <label for="emailDescription">Description</label>
+                </td>
+                <td>
+                    <textarea id="emailDescription" rows="5" class="text ui-widget-content ui-corner-all" style="width: 400px;"></textarea>
+                </td>
+            </tr>
+        </table>
+
+        <input type="hidden" name="emailPageUrl" id="emailPageUrl" value="@snapshotUrl" />
+        <input type="hidden" name="emailFacility" id="emailFacility" value="@facilityId" />
+        <input type="hidden" name="emailQueryParameters" id="emailQueryParameters" value="@queryParams" />
+        <input type="hidden" name="emailContent" id="emailContent" value="" />
+        <input type="hidden" name="emailPageLink" id="emailPageLink" />
+        <input type="hidden" name="emailApplication" id="emailApplication" value="@Settings.Application" />
+
+    </form>
+    <div id="feedback-messages" style="display: none;">
+        <h2 id="feedback-messages-title">Status</h2>
+    </div>
+
+    <div id="extra-message-after-send" style="display: none;">
+        @if (Settings.ClientName == "WD")
+        {
+            <span style="color: red; font-size: 10pt;">
+                For urgent issues, contact the IT help desk directly at 510-683-7100.
+            </span>
+        }
+    </div>
+
+    <div id="feedback-error-messages" style="display: none;">
+        <h3 id="feedback-error-header">An Error has occurred</h3>
+        <p>Please copy the text below and send to <a class="feedback-link" href="mailto:@Settings.FeedbackRecipients">@Settings.FeedbackRecipients</a></p>
+        <textarea id="feedback-errors" cols="90" rows="10"></textarea>
+    </div>
+
+    <div style="display: none">
+        <img id="feedback-working-image" height="18" width="18" style="vertical-align: bottom; margin-right: 5px;" src="@Url.Content("~/Content/images/orange_progress.gif")" />
+        <img id="feedback-error-image" height="18" width="18" style="vertical-align: bottom; margin-right: 5px;" src="@Url.Content("~/Content/images/icon-small-error-red.png")" />
+        <img id="feedback-success-image" height="18" width="18" style="vertical-align: bottom; margin-right: 5px;" src="@Url.Content("~/Content/images/icon-small-check-green.gif")" />
+    </div>
+</div>

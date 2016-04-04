@@ -1,0 +1,72 @@
+﻿@using Project.WebUI.Helpers
+@model IList<Project.Application.Models.Menus.MenuItem>
+@{
+    var page = Model;
+    var facility = ViewBag.Facility;
+}
+<div role="navigation" class="navbar navbar-default">
+    <!-- Needs to be reworked for more flexibility. - Scott Collier 08/25/2014 -->
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only"></span>
+            @foreach (var item in page)
+            {
+                <span class="icon-bar"></span>
+            }
+        </button>
+        @*<div class="navbar-brand">
+                @ViewBag.Facility
+            </div>*@
+    </div>
+    <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+            @foreach (var item in page)
+            {
+                var dropdown = "";
+                var attributes = new RouteValueDictionary();
+                var dropdownMenuOpen = "";
+                var dropdownMenuClose = "";
+                var caret = "";
+                var selected = item.IsActive ? "active" : "";
+
+                //var dataToggle2 = "";
+
+                if (item.Children.Any())
+                {
+                    dropdown = "dropdown";
+
+                    attributes.Add("class", "data-toggle");
+                    attributes.Add("data-toggle", "dropdown");
+                    attributes.Add("title", item.Title);
+
+                    dropdownMenuOpen = "<ul class=\"dropdown-menu\">";
+                    dropdownMenuClose = "</ul>";
+                    caret = "<b class=\"caret\"></b>";
+
+                }
+
+                @Html.Raw("<li class=\"" + dropdown + " " + selected + "\">")
+                @Html.UrlLink(item.Text + caret, item.Url, attributes, item.Parameters)
+
+                @Html.Raw(dropdownMenuOpen)
+
+                foreach (var child in item.Children)
+                {
+                    var attrs = new RouteValueDictionary
+                    {
+                        {"title", child.Title}
+                    };
+
+                    <li>
+                        @Html.UrlLink(child.Text, child.Url, attrs, child.Parameters)
+                    </li>
+                }
+
+                @Html.Raw(dropdownMenuClose)
+
+                @Html.Raw("</li>")
+
+            }
+        </ul>
+    </div>
+</div>

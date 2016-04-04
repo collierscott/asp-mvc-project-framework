@@ -1,0 +1,23 @@
+﻿@model IList<Project.WebUI.Models.Demos.GridItem>
+@{
+    var modules = Model;
+}
+<table id="toolset-table">
+    <thead>
+        <tr>
+            <th>Module</th>
+            <th>Toolset</th>
+            <th>Tool Count</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in modules)
+        {
+            <tr>
+                <td>@item.Module</td>
+                <td>@item.Toolset</td>
+                <td>@item.ToolCount</td>
+            </tr>
+        }
+    </tbody>
+</table>

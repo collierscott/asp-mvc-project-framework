@@ -1,0 +1,30 @@
+﻿@model Project.WebUI.Models.Demos.PageModels.StackedChartPageModel
+@{
+    ViewBag.Title = "CreateStackedbarChart";
+
+    var page = Model;
+    var facility = ViewBag.Facility;
+}
+@section HeaderScripts {
+    <script src="~/Scripts/Highcharts-4.0.1/js/highcharts-all.js"></script>
+}
+@{ Html.RenderAction("Menu", "Nav", new { selected = "Demos", parameters = new { facility } }); }
+<div class="row">
+    <div class="col-xs-12 col-md-4 col-md-offset-8">
+        @{
+            Html.RenderAction("LastUpdated", "Home");
+        }
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div id="chart-wrapper" style="width: 100%; text-align: center;">
+            <div id="chart-content" style="display: inline-block; width: 90%;">
+                @if (page != null)
+                {
+                    @(page.Chart)
+                }
+            </div>
+        </div>
+    </div>
+</div>

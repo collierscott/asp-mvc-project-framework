@@ -1,0 +1,88 @@
+﻿@using Project.Domain.Models.Entities;
+@using Project.WebUI.Models
+@model ToolHovermessageModel
+
+@{
+    var tool = Model.Tool;
+    var chambers = tool.Chambers;
+    var ports = tool.Ports;
+    var toolWidth = Model.Width;
+
+    var toolWidthPx = Model.Width + "px";
+    var toolHeightPx = Model.Height + "px";
+
+    var chamberHeight = Model.ChamberHeight + "px";
+    var portHeight = Model.PortHeight + "px";
+}
+
+<div id="@tool.Id" class="tool-outliner"  style="height: @toolHeightPx; width: @toolWidthPx;" title="@Html.Partial("Partial/Entities/_ToolHovermessageText", Model)">
+
+    <div class="entity-box" style="height: @toolHeightPx; width: @toolWidthPx;">
+
+       @Html.RouteLink(tool.Name, "Tool",
+       new {
+           facility = tool.FacilityId,
+           module = tool.ModuleName,
+           toolset = tool.EquipmentFamilyId,
+           tool = tool.Id
+       },
+       new {
+            style = "color: " + tool.TextColor
+        }
+       )
+    </div>
+    <div class="entity-container" style="height: @toolHeightPx; width: @toolWidthPx;">
+
+    @if (chambers != null) {
+        <div class="chambers">
+        @* ReSharper disable once ConvertToConstant.Local *@
+        @{
+            int chamberCount = chambers.Count;
+
+            double width = 100.0;
+            double adj = 0;
+            
+            if (chamberCount > 0) {
+                width = ((100.0 - adj) / chamberCount);
+            }
+        }
+
+        @foreach (Chamber chamber in chambers) {
+            <div class="chamber" style="height: @chamberHeight; width: @width%; @chamber.Style">&#160;</div>
+        }
+        </div>
+    }
+
+    @if (ports != null) {
+        
+        <div class="ports">
+        @{
+            int portCount = ports.Count;
+
+            double width = 100.0;
+            double adj = ((1.0/toolWidth) * 100) * (portCount - 1.0);
+
+            if (ports.Count > 0) {
+                width = ((100.0 - adj) / portCount);
+            }
+
+            int count = 0;
+        }
+
+        @foreach (Port port in ports) {
+            var border = "";
+            
+            if (count < portCount - 1) {
+                border = "border-right: 1px solid #000000;";
+            }   
+            count++;
+            
+            <div class="port" style="height: @portHeight; width: @width%; background-color: @port.Color; @border">&#160;</div>
+
+        }
+        
+        </div>
+    }
+
+    </div>
+</div>

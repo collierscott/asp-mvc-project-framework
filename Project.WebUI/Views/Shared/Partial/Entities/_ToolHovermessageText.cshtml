@@ -1,0 +1,69 @@
+﻿@using Project.Domain.Models.Entities;
+@using Project.WebUI.Models
+@model ToolHovermessageModel
+
+@{
+    var tool = Model.Tool;
+    var chambers = tool.Chambers;
+    var ports = tool.Ports;
+    var toolWidth = Model.Width;
+    var chamberWidth = Model.HovermessageChamberWidth + "px";
+    var portWidth = Model.HovermessagePortWidth;
+    
+}
+
+<table class="hovermessage">
+    <tr>
+        <td>
+            <span class="title">@tool.Name</span>
+            <span class="title">Module:&#160;</span>
+            <span style="font-weight: normal;">@tool.ModuleName</span>
+            <span class="title">Toolset:&#160;</span>
+            <span style="font-weight: normal;">@tool.EquipmentFamilyId</span>
+        </td>
+    </tr>
+
+    @if (tool.Chambers != null && tool.Chambers.Count > 0) {
+    <tr>
+        <td>
+            <table class="hovermessage-table">
+                <tr>
+                    <td>
+                            
+                    @foreach (Chamber chamber in tool.Chambers) {
+                        <div class="hover-chamber" style="min-width: @chamberWidth; @chamber.Style">@chamber.Id:&#160;&#160;@chamber.Notes</div>
+                    }
+
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    }
+
+    @if (tool.Ports != null && tool.Ports.Count > 0) {
+    <tr>
+        <td>
+            <table class="hovermessage-table">
+                <tr>
+
+                @{
+                    int portCell = portWidth + 10;
+                    var cWidth = portCell + "px";
+                    var pWidth = portWidth + "px";
+                }
+                        
+                @foreach (Port port in tool.Ports) {
+                    
+                    <td style="width: @cWidth; text-align: left;">
+                        <div class="hover-port" style="background-color: @port.Color; color: @port.TextColor; width: @pWidth;">@port.Name<br />@port.AutoDisplay</div>
+                    </td>
+                }
+
+                </tr>
+            </table>
+        </td>
+    </tr>
+    }
+
+</table>

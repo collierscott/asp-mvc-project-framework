@@ -1,0 +1,12 @@
+﻿@using Infrastructure.Data.Notify
+@model IList<Notification>
+@if (Model != null && Model.Any())
+{
+    foreach (var item in Model)
+    {
+        <div class="alert alert-warning">
+            ID:  @Html.Raw(item.Id + "<br/>")
+            MESSAGE:  @Html.Raw(item.UserMessage + "<br/>")
+        </div>
+    }
+}
