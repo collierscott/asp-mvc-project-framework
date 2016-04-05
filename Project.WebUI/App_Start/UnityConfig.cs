@@ -43,7 +43,7 @@ namespace Project.WebUI.App_Start
             //TODO:  Register your types here
             //TODO:  See if there is a good way to handle errors
 
-            container.RegisterType<IProjectRepository, ProjectRepository>(new PerRequestLifetimeManager(), new InjectionConstructor(Settings.ConnectionStringSettings.Name));
+            container.RegisterType<IProjectRepository, FakerRepository>(new PerRequestLifetimeManager(), new InjectionConstructor(Settings.ConnectionStringSettings.Name));
             container.RegisterType<IProjectService, ProjectService>(new PerRequestLifetimeManager());
 
             container.RegisterType<IMenuRepository, MenuRepository>(new PerRequestLifetimeManager(), new InjectionConstructor(""));

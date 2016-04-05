@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Faker.NET4, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Faker.Net.1.0.3\lib\net40\Faker.NET4.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Infrastructure.Data, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Infrastructure\bin\Release\Infrastructure.Data.dll</HintPath>
@@ -82,12 +86,14 @@
     <Compile Include="Repositories\Abstract\IProjectRepository.cs" />
     <Compile Include="Contexts\ProjectContext.cs" />
     <Compile Include="Repositories\Abstract\IMenuRepository.cs" />
+    <Compile Include="Repositories\FakerRepository.cs" />
     <Compile Include="Repositories\ProjectRepository.cs" />
     <Compile Include="Repositories\MenuRepository.cs" />
     <Compile Include="Services\Abstract\IProjectService.cs" />
     <Compile Include="Services\Abstract\IMenuService.cs" />
     <Compile Include="Services\ProjectService.cs" />
     <Compile Include="Services\MenuService.cs" />
+    <Compile Include="Utilities\ItemHasNoValue.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Project.Domain\Project.Domain.csproj">

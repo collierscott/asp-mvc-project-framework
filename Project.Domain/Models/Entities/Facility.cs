@@ -10,9 +10,7 @@ namespace Project.Domain.Models.Entities {
         public int SortOrder { get; set; }
 
         public Facility() {
-
             Modules = new HashSet<Module>();
-
         }
 
     }

@@ -9,7 +9,6 @@ namespace Project.Application.Repositories
 
     public class MenuRepository : IMenuRepository
     {
-
         // ReSharper disable once UnusedMember.Local
         // ReSharper disable once InconsistentNaming
         private readonly ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -39,7 +38,6 @@ namespace Project.Application.Repositories
             }
 
         }
-
         #region Dispose
         protected virtual void Dispose(bool disposing)
         {
@@ -61,7 +59,5 @@ namespace Project.Application.Repositories
 
         }
         #endregion
-
     }
-
 }

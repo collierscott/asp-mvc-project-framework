@@ -2,28 +2,22 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using Project.Application.Repositories.Abstract;
 using Infrastructure.Data;
 using Infrastructure.Data.Utilities;
-using log4net;
 using Project.Application.Models;
 using Project.Application.Models.Charting;
 using Project.Application.Queries;
 using Project.Application.Queries.Demos;
+using Project.Application.Repositories.Abstract;
 using Project.Application.Utilities;
 using Project.Domain.Models.Entities;
 
 namespace Project.Application.Repositories
 {
-
-    public class ProjectRepository : GenericRepository, IProjectRepository
+    public class FakerRepository : GenericRepository, IProjectRepository
     {
-
-        // ReSharper disable once UnusedMember.Local
-        private readonly ILog _log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-        public ProjectRepository(string context)
-            : base(context)
+        public FakerRepository(string context)
+            : base(string.Empty)
         { }
 
         public Facility FindFacility(string value)
@@ -33,17 +27,19 @@ namespace Project.Application.Repositories
             Messages.Add(query.Message);
             return facility;
         }
+
         public IDataReader BuildModules(string facility, string m = null)
         {
             var query = new BuildModulesQuery(facility, m);
             Messages.Add(query.Message);
+
             return GetDataReader(query);
         }
         public IEnumerable<Facility> GetAllFacilities()
         {
             var query = new GetFacilitiesQuery();
             return GetAll<Facility>(query);
-        }   
+        }
         public Module FindModule(string facility, string value)
         {
             var query = new FindModuleQuery(facility, value);
@@ -56,7 +52,8 @@ namespace Project.Application.Repositories
         public IEnumerable<ChartItem> GetStackedBarSeries(string facility)
         {
             var query = new GetStackBarSeriesQuery(facility);
-            return GetAll<ChartItem>(query).ToList();
+            var items = GetAll<ChartItem>(query).ToList();
+            return items;
         }
         public IEnumerable<ChartItem> GetStackedBarItems(string facility)
         {

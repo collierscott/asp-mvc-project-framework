@@ -34,7 +34,6 @@ namespace Project.WebUI.Controllers {
         [FacilityRequiredFilter]
         public ActionResult Index()
         {
-
             ViewBag.Page = "Demos";
             ViewBag.Messages = Messages;
 
