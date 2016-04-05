@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
 using Infrastructure.Data;
 using Infrastructure.Data.Utilities;
+using Moq;
 using Project.Application.Models;
 using Project.Application.Models.Charting;
-using Project.Application.Queries;
 using Project.Application.Queries.Demos;
 using Project.Application.Repositories.Abstract;
 using Project.Application.Utilities;
@@ -16,38 +17,127 @@ namespace Project.Application.Repositories
 {
     public class FakerRepository : GenericRepository, IProjectRepository
     {
+
+        private IList<Facility> _facilities;
+             
         public FakerRepository(string context)
             : base(string.Empty)
-        { }
+        {
+
+            _facilities = new List<Facility>();
+
+            for (int f = 0; f < 1; ++f)
+            {
+                var facility = new Facility
+                {
+                    Id = "DEMO1",
+                    Name = "DEMO1"
+                };
+
+                for (int m = 0; m < 5; ++m)
+                {
+                    var module = new Module
+                    {
+                        Id = Faker.Name.First(),
+                        Facility = facility,
+                        FacilityId = facility.Id,
+                        Name = Faker.Name.First()
+                    };
+
+                    var limit = new Random(10).Next(5, 15);
+
+                    for (int e = 0; e < limit; ++e)
+                    {
+                        var eqp = new EquipmentFamily
+                        {
+                            Id = Faker.Name.Last(),
+                            Name = Faker.Name.Last(),
+                            FacilityId = facility.Id,
+                            Module = module,
+                            ModuleId = module.Id,
+                            ModuleName = module.Name
+                        };
+
+                        var toolLimit = new Random(10).Next(5, 15);
+
+                        for (int t = 0; t < toolLimit; ++t)
+                        {
+                            var tool = new Tool
+                            {
+                                Id = "Tool" + Faker.RandomNumber.Next(100),
+                                EquipmentFamily = eqp,
+                                EquipmentFamilyId = eqp.Id,
+                                FacilityId = facility.Id,
+                                ModuleName = module.Name,
+                                ModuleId = module.Id,
+                            };
+
+                            eqp.Tools.Add(tool);
+
+                        }
+
+                        module.EquipmentFamilies.Add(eqp);
+                    }
+
+                    facility.Modules.Add(module);
+                }
+
+                _facilities.Add(facility);
+            }
+        }
 
         public Facility FindFacility(string value)
         {
-            var query = new FindFacilityQuery(value);
-            var facility = GetOneEntity<Facility>(query);
-            Messages.Add(query.Message);
+            var facility = (
+                from fac in _facilities
+                where fac.Id.Equals(value, StringComparison.OrdinalIgnoreCase)
+                select fac
+                ).FirstOrDefault();
             return facility;
         }
 
         public IDataReader BuildModules(string facility, string m = null)
         {
-            var query = new BuildModulesQuery(facility, m);
-            Messages.Add(query.Message);
+            var fac = FindFacility(facility);
 
-            return GetDataReader(query);
+            var modules = (from module in fac.Modules
+                where string.IsNullOrWhiteSpace(m) || module.Id.Equals(m, StringComparison.OrdinalIgnoreCase)
+                select module
+                );
+
+            var values = (from module in modules
+                from equipmentFamily in module.EquipmentFamilies
+                from tool in equipmentFamily.Tools
+                select new Dictionary<string, object>
+                {
+                    {"FACILITY", fac.Id},
+                    { "MODULE", module.Id},
+                    { "MODULE_DISPLAY", module.Name},
+                    { "TOOLSET", equipmentFamily.Id},
+                    { "TOOLSET_DISPLAY", equipmentFamily.Id},
+                    { "TOOL", tool.Id},
+                    { "TOOL_DISPLAY", tool.Name}
+                }).ToList();
+
+            return MockExecuteReader(values).Object;
         }
         public IEnumerable<Facility> GetAllFacilities()
         {
-            var query = new GetFacilitiesQuery();
-            return GetAll<Facility>(query);
+            return _facilities;
         }
         public Module FindModule(string facility, string value)
         {
-            var query = new FindModuleQuery(facility, value);
-            var module = GetOneEntity<Module>(query);
+            var f = (
+                from fac in _facilities
+                where fac.Id.Equals(facility, StringComparison.OrdinalIgnoreCase)
+                select fac
+                ).FirstOrDefault();
 
-            Messages.Add(query.Message);
+            var m = (from mod in f.Modules
+                where mod.Id.Equals(value, StringComparison.OrdinalIgnoreCase)
+                select mod).FirstOrDefault();
 
-            return module;
+            return m;
         }
         public IEnumerable<ChartItem> GetStackedBarSeries(string facility)
         {
@@ -121,6 +211,23 @@ namespace Project.Application.Repositories
             var query = new GetSeriesQuery(facility, waferSize, routeGroup, routeFamily);
 
             return GetAll<DropdownItem>(query);
+        }
+
+        private static Mock<IDataReader> MockExecuteReader(List<Dictionary<string, object>> returnValues)
+        {
+            var reader = new Mock<IDataReader>();
+            int count = 0;
+            reader.Setup(x => x.Read()).Returns(() => count < returnValues.Count).Callback(() => count++);
+
+            foreach (var returnValue in returnValues)
+            {
+                foreach (var key in returnValue.Keys)
+                {
+                    reader.SetupGet(x => x[key]).Returns(() => returnValue[key]);
+                }
+            }
+
+            return reader;
         }
     }
 }
