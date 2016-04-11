@@ -68,7 +68,7 @@
         <input type="hidden" name="feedbackContent" id="feedbackContent" value="" />
         <input type="hidden" name="feedbackLink" id="feedbackLink" />
         <input type="hidden" name="feedbackApplication" id="feedbackApplication" value="@Settings.Application" />
-        <input type="hidden" name="feedbackRecipients" id="feedbackRecipients" value="@Settings.FeedbackRecipients" />
+        @*<input type="hidden" name="feedbackRecipients" id="feedbackRecipients" value="@Settings.FeedbackRecipients" />*@
     </form>
     <form id="email-form" action="#" method="post" target="_blank" style="display: none;">
         <p class="validateTips"></p>
@@ -133,7 +133,7 @@
 
     <div id="feedback-error-messages" style="display: none;">
         <h3 id="feedback-error-header">An Error has occurred</h3>
-        <p>Please copy the text below and send to <a class="feedback-link" href="mailto:@Settings.FeedbackRecipients">@Settings.FeedbackRecipients</a></p>
+        <p>Please copy the text below and send to @*<a class="feedback-link" href="mailto:@Settings.FeedbackRecipients">@Settings.FeedbackRecipients</a></p>*@
         <textarea id="feedback-errors" cols="90" rows="10"></textarea>
     </div>
 

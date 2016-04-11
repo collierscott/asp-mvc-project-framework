@@ -19,7 +19,7 @@ namespace Project.WebUI.Controllers {
         {
 
             var fac = Utility.GetFacility(facility);
-
+            
             ViewBag.Page = "Home";
             ViewBag.Messages = Messages;
             ViewBag.Facility = fac;

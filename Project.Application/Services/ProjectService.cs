@@ -12,7 +12,6 @@ using System.Text;
 using Project.Application.Models;
 using Project.Application.Models.Demos;
 using Project.Application.Queries;
-using Infrastructure.Data;
 using Infrastructure.Data.Notify;
 using Infrastructure.Data.Utilities;
 
@@ -55,10 +54,7 @@ namespace Project.Application.Services
         /// <returns>Facility</returns>
         public Facility FindFacility(string value)
         {
-            var query = new FindFacilityQuery(value);
-            Messages.Add(query.Message);
-            var facility = _repository.GetOneEntity<Facility>(query);
-
+            var facility = _repository.FindFacility(value);
             return facility;
         }
 
@@ -82,8 +78,7 @@ namespace Project.Application.Services
 
         public IEnumerable<Facility> GetAllFacilities()
         {
-            var query = new GetFacilitiesQuery();
-            return _repository.GetAll<Facility>(query);
+            return _repository.GetAllFacilities();
         } 
 
         #region Module Queries
@@ -140,7 +135,7 @@ namespace Project.Application.Services
             var query = new BuildModulesQuery(facility, m);
             Messages.Add(query.Message);
 
-            using (var reader = _repository.GetDataReader(query))
+            using (var reader = _repository.BuildModules(facility, m))
             {
 
                 using (var data = new DataTable())
@@ -209,29 +204,22 @@ namespace Project.Application.Services
             }
 
             return items;
-
         }
         #endregion
 
         public IEnumerable<ChartItem> GetStackedBarSeries(string facility)
         {
-
-            var query = new GetStackBarSeriesQuery(facility);
-            var items = _repository.GetAll<ChartItem>(query).ToList();
-
+            var items = _repository.GetStackedBarSeries(facility).ToList();
             return items;
-
         }
 
         public IEnumerable<ChartItem> BuildStackedBarItems(string facility)
         {
-
             var items = new List<ChartItem>();
 
             var series = GetStackedBarSeries(facility).ToList();
 
-            var query = new GetStackedBarItemsQuery(facility);
-            var results = _repository.GetAll<ChartItem>(query).ToList();
+            var results = _repository.GetStackedBarItems(facility);
 
             var categories = (from rows in results
                               group rows by new
@@ -303,12 +291,10 @@ namespace Project.Application.Services
             }
 
             return items;
-
         }
 
         public IEnumerable<ChartItem> GetDemosChartItems(string facilities, string waferSizes, string routeGroup, string routeFamily, string ctmSeries, bool isExcel = false)
         {
-
             var items = new List<ChartItem>();
 
             var f = BuildFilter(facilities, waferSizes, routeGroup, routeFamily, ctmSeries);
@@ -316,7 +302,7 @@ namespace Project.Application.Services
 
             Messages.Add(query.Message);
 
-            using (var reader = _repository.GetDataReader(query))
+            using (var reader = _repository.GetDemosChartItems(f))
             {
 
                 if (reader != null)
@@ -433,83 +419,30 @@ namespace Project.Application.Services
             }
 
             return items;
-
         }
 
         public IEnumerable<DropdownItem> GetWaferSizeDropdownItems(string facility)
         {
-            var query = new GetWaferSizesQuery(facility);
-
-            return _repository.GetAll<DropdownItem>(query);
+            return _repository.GetWaferSizeDropdownItems(facility);
         }
 
         public IEnumerable<DropdownItem> GetRouteGroupDropdownItems(string facility, string waferSize)
         {
-
-            if (ItemHasNoValue(waferSize))
-            {
-                waferSize = String.Empty;
-            }
-            else
-            {
-                waferSize = QueryHelper.AddSingleQuotes(waferSize);
-            }
-
-            var query = new GetRouteGroupsQuery(facility, waferSize);
-
-            return _repository.GetAll<DropdownItem>(query);
-
+            return _repository.GetRouteGroupDropdownItems(facility, waferSize);
         }
 
         public IEnumerable<DropdownItem> GetRouteFamilyDropdownItems(string facility, string waferSize, string routeGroup)
         {
-
-            if (ItemHasNoValue(waferSize))
-            {
-                waferSize = String.Empty;
-            }
-            else
-            {
-                waferSize = QueryHelper.AddSingleQuotes(waferSize);
-            }
-
-            if (ItemHasNoValue(routeGroup))
-            {
-                routeGroup = String.Empty;
-            }
-            else
-            {
-                routeGroup = QueryHelper.AddSingleQuotes(routeGroup);
-            }
-
-            var query = new GetRouteFamiliesQuery(facility, waferSize, routeGroup);
-
-            return _repository.GetAll<DropdownItem>(query);
-
+            return _repository.GetRouteFamilyDropdownItems(facility, waferSize, routeGroup);
         }
 
         public IEnumerable<DropdownItem> GetSeriesDropdownItems(string facility, string waferSize, string routeGroup, string routeFamily)
         {
-
-            waferSize = ItemHasNoValue(waferSize) ? String.Empty : QueryHelper.AddSingleQuotes(waferSize);
-            routeGroup = ItemHasNoValue(routeGroup) ? String.Empty : QueryHelper.AddSingleQuotes(routeGroup);
-            routeFamily = ItemHasNoValue(routeFamily) ? String.Empty : QueryHelper.AddSingleQuotes(routeFamily);
-
-            var query = new GetSeriesQuery(facility, waferSize, routeGroup, routeFamily);
-
-            return _repository.GetAll<DropdownItem>(query);
-
-        }
-
-        public bool ItemHasNoValue(string value)
-        {
-            return string.IsNullOrWhiteSpace(value) || value.Equals("ALL", StringComparison.OrdinalIgnoreCase)
-                   || value.Equals("NONE", StringComparison.OrdinalIgnoreCase);
+            return _repository.GetSeriesDropdownItems(facility, waferSize, routeGroup, routeFamily);
         }
 
         private string BuildFilter(string facility, string waferSizes, string routeGroups, string routeFamilies, string ctmSeries, bool useSeries = false)
         {
-
             var sb = new StringBuilder();
 
             if (!string.IsNullOrEmpty(facility) && !facility.Equals("ALL", StringComparison.OrdinalIgnoreCase) && !useSeries)
@@ -544,7 +477,6 @@ namespace Project.Application.Services
             }
 
             return sb.ToString();
-
         }
 
         #region Implementation of Dispose
