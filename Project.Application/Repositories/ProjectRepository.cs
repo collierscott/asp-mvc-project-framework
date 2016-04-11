@@ -24,7 +24,7 @@ namespace Project.Application.Repositories
 
         public ProjectRepository(string context)
             : base(context)
-        { }
+        {}
 
         public Facility FindFacility(string value)
         {
